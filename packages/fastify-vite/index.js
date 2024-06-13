@@ -1,5 +1,7 @@
-const fp = require('fastify-plugin')
-const { configure } = require('./config')
+import fp from 'fastify-plugin'
+import { configure } from './config.js'
+import { join } from './ioutils.js'
+import FastifyStatic from '@fastify/static'
 
 const kMode = Symbol('kMode')
 const kOptions = Symbol('kOptions')
@@ -24,14 +26,24 @@ class Vite {
     // Determine which setup function to use
     this[kMode] = this.config.dev
       ? // Boots Vite's development server and ensures hot reload
-        require('./mode/development')
+        await import('./mode/development.js')
       : // Assumes presence of and uses production bundled distribution
-        require('./mode/production')
+        await import('./mode/production.js')
 
     // Get handler function and routes based on the Vite server bundle
-    const { client, routes, handler, errorHandler } = await this[
+    const { clientDist, client, routes, handler, errorHandler } = await this[
       kMode
     ].setup.call(this, this.config, this.createServer)
+
+    if (!this.config.dev) {
+      const staticRoot = join(this.config.vite.root, 'static')
+      await this.scope.register(async function publicFiles(scope) {
+        await scope.register(FastifyStatic, {
+          prefix: '/static/',
+          root: staticRoot,
+        })
+      })
+    }
 
     // Register individual Fastify routes for each the client-provided routes
     if (routes && typeof routes[Symbol.iterator] === 'function') {
@@ -117,10 +129,6 @@ function plugin(scope, options, done) {
   done()
 }
 
-const fastifyVite = fp(plugin, {
+export default fp(plugin, {
   name: '@fastify/vite',
 })
-
-module.exports = fastifyVite
-module.exports.default = fastifyVite
-module.exports.fastifyVite = fastifyVite

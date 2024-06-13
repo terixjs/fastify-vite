@@ -1,8 +1,4 @@
-const { ensureConfigFile, ejectBlueprint } = require('./setup')
-const { createHtmlTemplateFunction } = require('./html')
-const { ensureESMBuild } = require('./vite')
+export { ensureConfigFile, ejectBlueprint } from './setup.js'
+export { createHtmlTemplateFunction } from './html.js'
+export { ensureESMBuild } from './vite.js'
 
-module.exports.ensureESMBuild = ensureESMBuild
-module.exports.createHtmlTemplateFunction = createHtmlTemplateFunction
-module.exports.ensureConfigFile = ensureConfigFile
-module.exports.ejectBlueprint = ejectBlueprint

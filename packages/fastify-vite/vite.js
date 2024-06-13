@@ -1,4 +1,4 @@
-function ensureESMBuild() {
+export function ensureESMBuild() {
   return {
     name: 'fastify-vite-ensure-esm-build',
     config(config, { command }) {
@@ -12,5 +12,3 @@ function ensureESMBuild() {
     },
   }
 }
-
-module.exports = { ensureESMBuild }

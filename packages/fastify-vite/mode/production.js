@@ -1,5 +1,5 @@
-const { parse, resolve, join, read, exists } = require('../ioutils')
-const FastifyStatic = require('@fastify/static')
+import { parse, resolve, join, read, exists } from '../ioutils.js'
+import FastifyStatic from '@fastify/static'
 
 function fileUrl(str) {
   if (typeof str !== 'string') {
@@ -50,15 +50,16 @@ async function setup(config) {
     })
   })
 
-  // And again for files in the public/ folder
-  await this.scope.register(async function publicFiles(scope) {
-    await scope.register(FastifyStatic, {
-      root: clientDist,
-      allowedPath(path) {
-        return path !== '/index.html'
-      },
-    })
-  })
+  // // And again for files in the public/ folder
+  // await this.scope.register(async function publicFiles(scope) {
+  //   console.log('clientDist', clientDist)
+  //   await scope.register(FastifyStatic, {
+  //     root: clientDist,
+  //     allowedPath(path) {
+  //       return path !== '/index.html'
+  //     },
+  //   })
+  // })
 
   // Note: this is just to ensure it works, for a real world
   // production deployment, you'll want to capture those paths in
@@ -100,7 +101,7 @@ async function setup(config) {
     this.scope.decorateReply('render', renderFunction)
   }
 
-  return { client, routes: client?.routes }
+  return { clientDist, client, routes: client?.routes }
 
   // Loads the Vite application server entry point for the client
   async function loadClient() {
@@ -143,6 +144,6 @@ async function setup(config) {
   }
 }
 
-module.exports = {
+export {
   setup,
 }

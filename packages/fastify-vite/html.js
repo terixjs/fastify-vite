@@ -1,6 +1,6 @@
-const { Readable } = require('stream')
+import { Readable } from 'stream'
 
-function createHtmlTemplateFunction(source) {
+export function createHtmlTemplateFunction(source) {
   const ranges = new Map()
   const interpolated = ['']
   const params = []
@@ -65,10 +65,6 @@ function asReadable(fragments, ...values) {
       }
     })(),
   )
-}
-
-module.exports = {
-  createHtmlTemplateFunction,
 }
 
 function serialize(frag) {

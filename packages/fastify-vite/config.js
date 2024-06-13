@@ -1,6 +1,9 @@
-const { fileURLToPath } = require('node:url')
-const { dirname, join, resolve, exists, stat, read } = require('./ioutils')
-const { createHtmlTemplateFunction } = require('./html')
+import { fileURLToPath } from 'node:url'
+import { createRequire } from 'node:module'
+import { dirname, join, resolve, exists, stat, read } from './ioutils.js'
+import { createHtmlTemplateFunction } from './html.js'
+
+const require = createRequire(import.meta.url)
 
 const DefaultConfig = {
   // Whether or not to enable Vite's Dev Server
@@ -278,9 +281,8 @@ async function resolveSPABundle({ dev, vite }) {
   return bundle
 }
 
-module.exports = {
+export {
   configure,
   resolveSSRBundle,
   resolveSPABundle,
 }
-module.exports.default = module.exports

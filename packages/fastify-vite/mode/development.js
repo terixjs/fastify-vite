@@ -1,33 +1,42 @@
-const middie = require('@fastify/middie')
-const { join, resolve, read, exists } = require('../ioutils')
+import FastifyMiddie from '@fastify/middie'
+import { join, resolve, read } from '../ioutils.js'
 
 const hot = Symbol('hotModuleReplacementProxy')
 
 async function setup(config) {
-  const { createServer, mergeConfig, defineConfig } = await import('vite')
+  const { 
+    createServer, 
+    createServerModuleRunner, 
+    createNodeDevEnvironment, 
+    mergeConfig, 
+    defineConfig 
+  } = await import('vite')
 
   // Middie seems to work well for running Vite's development server
   // Unsure if fastify-express is warranted here
-  await this.scope.register(middie)
+  await this.scope.register(FastifyMiddie)
 
   // Create and enable Vite's Dev Server middleware
   const devServerOptions = mergeConfig(
     defineConfig({
       configFile: false,
-      server: {
-        middlewareMode: true,
-        hmr: {
-          server: this.scope.server,
-        },
-      },
+      server: { middlewareMode: true },
       appType: 'custom',
+      environments: {
+        node: {
+          dev: {
+            createEnvironment: createNodeDevEnvironment,
+          }
+        }
+      }
     }),
     config.vite,
   )
 
   this.devServer = await createServer(devServerOptions)
+  this.devRunner = await createServerModuleRunner(this.devServer.environments.node)
+  
   this.scope.use(this.devServer.middlewares)
-
   this.scope.decorate(hot, {})
 
   // Loads the Vite application server entry point for the client
@@ -39,7 +48,7 @@ async function setup(config) {
       config.vite.root,
       config.clientModule.replace(/^\/+/, ''),
     )
-    let entryModule = await this.devServer.ssrLoadModule(modulePath)
+    let entryModule = await this.devRunner.import(modulePath)
     if (typeof entryModule.default === 'function') {
       entryModule = await entryModule.default(config)
       return entryModule
@@ -117,7 +126,7 @@ async function setup(config) {
   }
 }
 
-module.exports = {
+export {
   setup,
   hot,
 }
