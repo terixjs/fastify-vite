@@ -2,7 +2,7 @@
   "type": "module",
   "devDependencies": {
     "markdown-it-mathjax3": "^4.3.2",
-    "mermaid": "^10.6.1",
+    "mermaid": "^10.9.3",
     "vitepress": "1.0.0-rc.25",
     "vitepress-plugin-mermaid": "^2.0.15"
   },
