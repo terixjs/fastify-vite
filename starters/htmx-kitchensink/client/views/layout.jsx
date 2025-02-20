@@ -27,7 +27,7 @@ export default function ({ app, req, reply }) {
         <a href="/">Go back to the index</a>
       </p>
       <p>⁂</p>
-      <p>This example is exactly the same as <a ree="/data">/data</a>,
+      <p>This example is exactly the same as <a href="/data">/data</a>,
       except it's wrapped in a custom layout which blocks it until
       <code>req.session.user</code> exists.</p>
     </>
