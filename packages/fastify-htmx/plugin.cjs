@@ -82,7 +82,7 @@ function viteFastifyHtmx(config = {}) {
         }
       },
       load(id, options) {
-        if (options?.ssr && id.endsWith('.client.js')) {
+        if (options?.ssr && (id.endsWith('.client.js') || id.endsWith('.client.ts'))) {
           return {
             code: '',
             map: null,
