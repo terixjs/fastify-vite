@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { renderToStream } from '@kitajs/html/suspense.js'
 import * as devalue from 'devalue'
-import { findStaticImports } from 'mlly'
+import { findStaticImports, resolvePath } from 'mlly'
 
 export default {
   prepareClient,
@@ -147,11 +147,35 @@ async function findClientImports(
   { js = [], css = [], svg = [] } = {},
 ) {
   const source = await readFile(join(root, path), 'utf8')
-  const specifiers = findStaticImports(source)
-    .filter(({ specifier }) => {
-      return specifier.match(/\.((svg)|(css)|(m?js)|(tsx?)|(jsx?))$/)
-    })
-    .map(({ specifier }) => specifier)
+  const specifiers = (
+    await Promise.all(
+      findStaticImports(source).map(async ({ specifier }) => {
+        if (extname(specifier)) {
+          return specifier
+        }
+        const resolved = resolve(dirname(path), specifier)
+
+        // resolve the file extension which allows for
+        // resolved client imports without specified extensions
+        try {
+          const filePathWithExtension = await resolvePath(
+            join(root, resolved),
+            {
+              extensions: ['.mjs', '.cjs', '.js', '.ts', '.tsx'],
+            },
+          )
+          const specifier = filePathWithExtension.replace(root, '')
+
+          return specifier
+        } catch (e) {
+          return ''
+        }
+      }),
+    )
+  ).filter((specifier) => {
+    return specifier.match(/\.((svg)|(css)|(m?js)|(tsx?)|(jsx?))$/)
+  })
+
   for (const specifier of specifiers) {
     const resolved = resolve(dirname(path), specifier)
     if (specifier.match(/\.svg$/)) {
