@@ -8,6 +8,7 @@ export default {
   prepareClient,
   createHtmlFunction,
   createRouteHandler,
+  createErrorHandler,
 }
 
 const kPrefetch = Symbol('kPrefetch')
@@ -171,4 +172,14 @@ async function findClientImports(
     }
   }
   return { js, css, svg }
+}
+
+function createErrorHandler(_, scope, config) {
+  return (error, req, reply) => {
+    if (config.dev) {
+      scope.log.error(error)
+      scope.vite.devServer.ssrFixStacktrace(error)
+    }
+    scope.errorHandler(error, req, reply)
+  }
 }
